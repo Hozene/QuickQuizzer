@@ -1,8 +1,27 @@
 const fetch = require("node-fetch");
 const he = require('he');
 
+// fetch the total number of verified trivia questions
+const fetchTotalQuestions = async () => {
+    try {
+        const url = 'https://opentdb.com/api_count_global.php';
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Failed to connect to Open Trivia DB.");
+        }
+
+        const data = await response.json();
+
+        return data.overall.total_num_of_verified_questions;
+    } catch (err) {
+        console.error("Error fetching total questions:", err.message);
+        throw err;
+    }
+};
+
 // fetch trivia questions from Open Trivia DB
-const fetchTriviaQuestions = async (amount = 10, category = "", difficulty = "medium", type = "multiple") => {
+const fetchTriviaQuestions = async (amount = 10, category = "", difficulty = "", type = "multiple") => {
     try {
         const url = `https://opentdb.com/api.php?amount=${amount}&category=${category}&difficulty=${difficulty}&type=${type}`;
         const response = await fetch(url);
@@ -32,4 +51,4 @@ const fetchTriviaQuestions = async (amount = 10, category = "", difficulty = "me
     }
 };
 
-module.exports = { fetchTriviaQuestions };
+module.exports = { fetchTriviaQuestions, fetchTotalQuestions };
