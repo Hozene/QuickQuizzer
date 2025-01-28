@@ -5,38 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trivia Quiz</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
-<div class="container">
-    <header>
+<header class="main-header">
+    <div class="container">
         <h1>Your Trivia Quiz</h1>
         <p>Answer the questions below and test your knowledge!</p>
-    </header>
+    </div>
+</header>
+<main>
+    <div class="container">
+        <form action="/results" method="POST" class="quiz-form">
+            <% questions.forEach((question, index) => { %>
+                <section class="question-group">
+                    <h3>Q<%= index + 1 %>: <%= question.question %></h3>
+                    <ul class="options-list">
+                        <%
+                            const options = [...question.incorrect_answers, question.correct_answer];
+                            options.sort(() => Math.random() - 0.5);
+                        %>
+                        <% options.forEach((option) => { %>
+                            <li>
+                                <label class="option-label">
+                                    <input type="radio" name="answer<%= index %>" value="<%= option %>" required />
+                                    <%= option %>
+                                </label>
+                            </li>
+                        <% }); %>
+                    </ul>
+                    <input type="hidden" name="correctAnswer<%= index %>" value="<%= question.correct_answer %>" />
+                </section>
+            <% }); %>
 
-    <form action="/results" method="POST">
-        <% questions.forEach((question, index) => { %>
-            <div class="question">
-                <h3>Q<%= index + 1 %>: <%= question.question %></h3>
-                <ul>
-                    <%
-                        const options = [...question.incorrect_answers, question.correct_answer];
-                        options.sort(() => Math.random() - 0.5); // shuffle the options
-                    %>
-                    <% options.forEach((option) => { %>
-                        <li>
-                            <label>
-                                <input type="radio" name="answer<%= index %>" value="<%= option %>" required />
-                                <%= option %>
-                            </label>
-                        </li>
-                    <% }); %>
-                </ul>
-                <input type="hidden" name="correctAnswer<%= index %>" value="<%= question.correct_answer %>" />
-            </div>
-        <% }); %>
-
-        <button type="submit">Submit Answers</button>
-    </form>
-</div>
+            <button type="submit">Submit Answers</button>
+        </form>
+    </div>
+</main>
+<footer class="main-footer">
+    <div class="container">
+        <p>&copy; 2025 QuickQuizzer. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>

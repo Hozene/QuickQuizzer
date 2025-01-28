@@ -5,13 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Results</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
-<div class="container">
-    <h1>Your Quiz Results</h1>
-    <p>You answered <%= score %> out of <%= totalQuestions %> questions correctly.</p>
-    <p>Good job!</p>
-    <a href="/" class="btn">Try Again</a>
-</div>
+<header class="main-header">
+    <div class="container">
+        <h1>Your Quiz Results</h1>
+    </div>
+</header>
+<main>
+    <div class="container results-container">
+        <p>You answered <span class="score"><%= score %></span> out of <span class="total"><%= totalQuestions %></span> questions correctly.</p>
+        <p>Good job! You can always try again to improve your score.</p>
+        <a href="/" style="text-decoration: none"><button type="submit">Try Again</button></a>
+    </div>
+</main>
+<footer class="main-footer">
+    <div class="container">
+        <p>&copy; 2025 QuickQuizzer. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>
