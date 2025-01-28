@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trivia Game</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Welcome to the Trivia Game!</h1>
+        <p>Test your knowledge and have fun!</p>
+    </header>
+
+    <% if (error) { %>
+        <div class="error">
+            <p><%= error %></p>
+        </div>
+    <% } %>
+
+    <form action="/quiz" method="POST">
+        <label for="category">Choose a Category:</label>
+        <select name="category" id="category">
+            <option value="">Any Category</option>
+            <option value="9">General Knowledge</option>
+            <option value="11">Movies</option>
+            <option value="12">Music</option>
+            <option value="15">Video Games</option>
+            <option value="17">Science & Nature</option>
+            <option value="18">Computers</option>
+        </select>
+
+        <label for="difficulty">Select Difficulty:</label>
+        <select name="difficulty" id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+        <button type="submit">Start Quiz</button>
+    </form>
+</div>
+</body>
+</html>

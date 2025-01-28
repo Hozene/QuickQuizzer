@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trivia Quiz</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Your Trivia Quiz</h1>
+        <p>Answer the questions below and test your knowledge!</p>
+    </header>
+
+    <form action="/results" method="POST">
+        <% questions.forEach((question, index) => { %>
+            <div class="question">
+                <h3>Q<%= index + 1 %>: <%= question.question %></h3>
+                <ul>
+                    <%
+                        const options = [...question.incorrect_answers, question.correct_answer];
+                        options.sort(() => Math.random() - 0.5); // shuffle the options
+                    %>
+                    <% options.forEach((option) => { %>
+                        <li>
+                            <label>
+                                <input type="radio" name="answer<%= index %>" value="<%= option %>" required />
+                                <%= option %>
+                            </label>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
+        <% }); %>
+
+        <button type="submit">Submit Answers</button>
+    </form>
+</div>
+</body>
+</html>
