@@ -8,6 +8,7 @@
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
+<%- include('partials/navbar', { userID: userID })) %>
 <header class="main-header">
     <div class="container">
         <h1>Your Quiz Results</h1>
@@ -16,14 +17,22 @@
 <main>
     <div class="container results-container">
         <p>You answered <span class="score"><%= score %></span> out of <span class="total"><%= totalQuestions %></span> questions correctly.</p>
+        <div class="feedback">
+            <% questions.forEach((question, index) => { %>
+                <div class="question-feedback">
+                    <h3>Q<%= index + 1 %>: <%= question.question %></h3>
+                    <p>Your Answer: <%= question.userAnswer %></p>
+                    <p>Correct Answer: <%= question.correctAnswer %></p>
+                    <p class="<%= question.userAnswer === question.correctAnswer ? 'correct' : 'incorrect' %>">
+                        <%= question.userAnswer === question.correctAnswer ? 'Correct!' : 'Incorrect!' %>
+                    </p>
+                </div>
+            <% }); %>
+        </div>
         <p>Good job! You can always try again to improve your score.</p>
         <a href="/" style="text-decoration: none"><button type="submit">Try Again</button></a>
     </div>
 </main>
-<footer class="main-footer">
-    <div class="container">
-        <p>&copy; 2025 QuickQuizzer. All rights reserved.</p>
-    </div>
-</footer>
+<%- include('partials/footer') %>
 </body>
 </html>

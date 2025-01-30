@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Trivia Game</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+</head>
+<body>
+<%- include('partials/navbar', { userID: userID }) %>
+<header class="main-header">
+    <div class="container">
+        <h1>Register</h1>
+        <p>Create an account to start playing!</p>
+    </div>
+</header>
+<main>
+    <div class="container">
+        <% if (error) { %>
+            <div class="error-message">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <form action="/register" method="POST" class="quiz-form">
+            <section class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required class="form-control">
+            </section>
+            <section class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required class="form-control">
+            </section>
+            <section class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                <input type="tel" id="phone_number" name="phone_number" required class="form-control" placeholder="+1 (123) 456-78-90">
+            </section>
+            <section class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required class="form-control" placeholder="you@example.com">
+            </section>
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login here</a>.</p>
+    </div>
+</main>
+<%- include('partials/footer') %>
+</body>
+</html>

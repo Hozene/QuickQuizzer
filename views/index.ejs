@@ -8,6 +8,7 @@
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
+<%- include('partials/navbar', { userID: userID }) %>
 <header class="main-header">
     <div class="container">
         <h1>Welcome to the Trivia Game!</h1>
@@ -47,10 +48,6 @@
         </form>
     </div>
 </main>
-<footer class="main-footer">
-    <div class="container">
-        <p>&copy; 2025 QuickQuizzer. All rights reserved.</p>
-    </div>
-</footer>
+<%- include('partials/footer') %>
 </body>
 </html>
