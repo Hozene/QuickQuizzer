@@ -3,51 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia Game</title>
+    <title>QuickQuizzer</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
-<%- include('partials/navbar', { userID: userID }) %>
-<header class="main-header">
-    <div class="container">
-        <h1>Welcome to the Trivia Game!</h1>
-        <p>Test your knowledge and have fun!</p>
-    </div>
-</header>
+<%- include('partials/navbar', { userID: userID, username: username }) %>
 <main>
-    <div class="container">
-        <% if (error) { %>
-            <div class="error">
-                <p><%= error %></p>
-            </div>
-        <% } %>
+    <h1>Choose a Category</h1>
+    <p>Answer ten questions and test your knowledge!</p>
 
-        <form action="/quiz" method="POST" class="quiz-form">
-            <section class="form-group">
-                <label for="category">Choose a Category:</label>
-                <select name="category" id="category" class="form-control">
-                    <option value="">Any Category</option>
-                    <option value="9">General Knowledge</option>
-                    <option value="11">Movies</option>
-                    <option value="12">Music</option>
-                    <option value="15">Video Games</option>
-                    <option value="17">Science & Nature</option>
-                    <option value="18">Computers</option>
-                </select>
-            </section>
-            <section class="form-group">
-                <label for="difficulty">Select Difficulty:</label>
-                <select name="difficulty" id="difficulty" class="form-control">
-                    <option value="easy">Easy</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </section>
-            <button type="submit">Start Quiz</button>
-        </form>
+    <!-- Category Grid -->
+    <div class="category-grid">
+        <!-- Any Category -->
+        <div class="category-card any-category">
+            <img src="images/any-category.png" alt="Any Category">
+            <h3>Any Category</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- General Knowledge -->
+        <div class="category-card">
+            <img src="images/general-knowledge.png" alt="General Knowledge">
+            <h3>General Knowledge</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- Movies -->
+        <div class="category-card">
+            <img src="images/movies.png" alt="Movies">
+            <h3>Movies</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- Music -->
+        <div class="category-card">
+            <img src="images/music.png" alt="Music">
+            <h3>Music</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- Video Games -->
+        <div class="category-card">
+            <img src="images/video-games.png" alt="Video Games">
+            <h3>Video Games</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- Science & Nature -->
+        <div class="category-card">
+            <img src="images/science-nature.png" alt="Science & Nature">
+            <h3>Science & Nature</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
+
+        <!-- Computers -->
+        <div class="category-card">
+            <img src="images/computers.png" alt="Computers">
+            <h3>Computers</h3>
+            <p>Lipsum as it is sometimes known is dummy text.</p>
+        </div>
     </div>
+    <button class="start-quiz-button">Start Quiz</button>
 </main>
+
 <%- include('partials/footer') %>
 </body>
 </html>

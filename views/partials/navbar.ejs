@@ -1,14 +1,20 @@
 <nav class="navbar">
-    <div class="container">
-        <a href="/" class="navbar-brand"><img src="images/icon.ico" style="max-height: 40px"></a>
-        <ul class="navbar-nav">
-            <% if (userID) { %>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="/logout">Logout</a></li>
-            <% } else { %>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
-            <% } %>
-        </ul>
-    </div>
+    <a href="/" class="logo"><img src="images/icon.ico" style="max-height: 40px">QuickQuizzer</a>
+    <% if (userID) { %>
+        <div class="user-profile">
+            <div class="profile-toggle">
+                <span><%= username %></span>
+                <img src="images/profile.png" alt="Profile Picture">
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="dropdown-menu">
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    <% } else { %>
+        <a href="/login" class="login-button">Login</a>
+    <% } %>
 </nav>
+
+<script src="./js/navbar.js"></script>

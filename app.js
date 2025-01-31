@@ -21,9 +21,14 @@ app.use(session({
 }));
 
 // routes
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+    console.log('Rendering index with:', {
+        userID: req.session.userID,
+        username: req.session.username
+    }); // Debug data being passed
     res.render('index', {
         userID: req.session.userID || null,
+        username: req.session.username || null,
         error: null
     });
 });
@@ -43,6 +48,26 @@ app.get('/register', (req, res) => {
     res.render('register', {
         userID: req.session.userID || null,
         error: null
+    });
+});
+
+app.get('/profile', (req, res) => {
+    if (!req.session.userID) {
+        return res.redirect('/login');
+    }
+    res.render('profile', {
+        userID: req.session.userID,
+        username: req.session.username,
+        error: null
+    });
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Error destroying session:", err);
+        }
+        res.redirect('/');
     });
 });
 
@@ -68,7 +93,7 @@ app.post('/register', async (req, res) => {
             });
         }
         // phone number format
-        const phoneRegex = /^\+?[0-9\s\(\)]{10,15}$/;
+        const phoneRegex = /^\+?[0-9\s()]{10,15}$/;
         if (!phoneRegex.test(phone_number)) {
             return res.render('register', {
                 error: 'Invalid phone number format. Only digits, +, (), and spaces are allowed.',
@@ -104,16 +129,25 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const sqlQuery = `SELECT ID FROM Users WHERE username = '${username}' AND password = '${password}'`;
+        const sqlQuery = `SELECT ID, username FROM Users WHERE username = '${username}' AND password = '${password}'`;
         const result = await query(sqlQuery);
         if (result.length > 0) {
             req.session.userID = result[0].ID;
+            req.session.username = result[0].username;
             res.redirect('/');
         } else {
-            res.render('index', { error: 'Invalid username or password.' });
+            res.render('index', {
+                error: 'Invalid username or password.',
+                userID: null,
+                username: null
+            });
         }
     } catch (err) {
-        res.render('index', { error: 'Login failed. Please try again.' });
+        res.render('index', {
+            error: 'Login failed. Please try again.',
+            userID: null,
+            username: null
+        });
     }
 });
 
