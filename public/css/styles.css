@@ -6,7 +6,7 @@ body, h1, h2, h3, p, ul, li, form, input, button, a {
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     color: #333;
     min-height: 100vh;
@@ -171,6 +171,7 @@ main p {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
 }
 
 .category-card:hover {
@@ -178,19 +179,27 @@ main p {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.category-card img {
+.category-button {
+    background: none;
+    border: none;
+    padding: 0;
+    width: 100%;
+    cursor: pointer;
+}
+
+.category-button img {
     width: 60px;
     height: 60px;
     margin-bottom: 15px;
 }
 
-.category-card h3 {
+.category-button h3 {
     font-size: 20px;
     color: #6a11cb;
     margin-bottom: 10px;
 }
 
-.category-card p {
+.category-button p {
     font-size: 14px;
     color: #777;
 }

@@ -8,10 +8,16 @@ const startQuiz = async (req, res) => {
         // Fetch questions from the API
         const questions = await fetchTriviaQuestions(10, category, difficulty);
 
-        res.render("quiz", { questions });
+        res.render("quiz", {
+            questions,
+            userID: req.session.userID || null
+        });
     } catch (error) {
         // handle errors, render the index page with an error message
-        res.render("index", { error: error.message });
+        res.render("index", {
+            error: error.message,
+            userID: req.session.userID || null
+        });
     }
 };
 
