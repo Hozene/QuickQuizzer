@@ -3,10 +3,20 @@ const express = require("express");
 const session = require('express-session');
 const path = require("path");
 const quizController = require("./src/quizController");
+const apiService = require("./src/apiService");
 const { query } = require("./src/db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const categoryMap = {
+    9: "General Knowledge",
+    11: "Movies",
+    12: "Music",
+    15: "Video Games",
+    17: "Science & Nature",
+    18: "Computers"
+};
 
 // middleware
 app.set("view engine", "ejs");
@@ -41,33 +51,6 @@ app.get('/login', (req, res) => {
     res.render('login', {
         userID: req.session.userID || null,
         error: null
-    });
-});
-
-app.get('/register', (req, res) => {
-    res.render('register', {
-        userID: req.session.userID || null,
-        error: null
-    });
-});
-
-app.get('/profile', (req, res) => {
-    if (!req.session.userID) {
-        return res.redirect('/login');
-    }
-    res.render('profile', {
-        userID: req.session.userID,
-        username: req.session.username,
-        error: null
-    });
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error("Error destroying session:", err);
-        }
-        res.redirect('/');
     });
 });
 
@@ -136,19 +119,103 @@ app.post('/login', async (req, res) => {
             req.session.username = result[0].username;
             res.redirect('/');
         } else {
-            res.render('index', {
+            res.render('login', {
                 error: 'Invalid username or password.',
                 userID: null,
                 username: null
             });
         }
     } catch (err) {
-        res.render('index', {
+        res.render('login', {
             error: 'Login failed. Please try again.',
             userID: null,
             username: null
         });
     }
+});
+
+app.get('/register', (req, res) => {
+    res.render('register', {
+        userID: req.session.userID || null,
+        error: null
+    });
+});
+
+app.get('/profile', async (req, res) => {
+    if (!req.session.userID) {
+        return res.redirect('/login');
+    }
+    try {
+        const totalQuestions = await apiService.fetchTotalQuestions();
+
+        // unique questions answered by the user
+        const userQuestionsQuery = `
+            SELECT DISTINCT AnswerID, Category 
+            FROM QuestionResults 
+            WHERE UserID = ${req.session.userID}
+        `;
+        const userQuestions = await query(userQuestionsQuery);
+        req.session.userQuestions = userQuestions;
+
+        // progress
+        const totalAnswered = userQuestions.length;
+        const progressPercentage = ((totalAnswered / totalQuestions) * 100).toFixed(2);
+
+        res.render('profile', {
+            userID: req.session.userID,
+            username: req.session.username,
+            progressPercentage: progressPercentage,
+            error: null
+        });
+    } catch (err) {
+        console.error('Error loading profile:', err);
+        res.render('profile', {
+            userID: req.session.userID,
+            username: req.session.username,
+            progressPercentage: 0,
+            error: 'Failed to load profile data.'
+        });
+    }
+});
+
+app.get("/userChartData", async (req, res) => {
+    if (!req.session.userID) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+        const userQuestions = req.session.userQuestions;
+
+        const categoryCounts = {};
+        userQuestions.forEach((question) => {
+            const categoryName = categoryMap[question.Category] || `Category ${question.Category}`;
+            categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
+        });
+
+        const pieChartData = {
+            labels: Object.keys(categoryCounts),
+            datasets: [{
+                data: Object.values(categoryCounts),
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'
+                ]
+            }]
+        };
+
+        res.json(pieChartData);
+    } catch (err) {
+        console.error("Error loading chart data:", err);
+        res.status(500).json({ error: "Failed to load chart data" });
+    }
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Error destroying session:", err);
+        }
+        res.redirect('/');
+    });
 });
 
 // start server

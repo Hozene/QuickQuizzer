@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - QuickQuizzer</title>
+    <title>QuickQuizzer</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/chart.js"> </script>
 </head>
 <body>
 <%- include('partials/navbar', { userID: userID, username: username }) %>
@@ -13,7 +15,21 @@
     <div class="container">
         <h1>Profile</h1>
         <p>Welcome, <%= username %>!</p>
-        <p>Here you can view and update your profile information.</p>
+
+        <!-- progress bar -->
+        <div class="progress-container">
+            <h3>Progress</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: <%= progressPercentage %>%;"></div>
+            </div>
+            <p><%= progressPercentage %>% of all questions answered.</p>
+        </div>
+
+        <!-- pie chart -->
+        <div class="chart-container">
+            <h3>Questions Answered by Category</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
     </div>
 </main>
 <%- include('partials/footer') %>

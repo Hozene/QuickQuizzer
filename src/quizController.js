@@ -8,15 +8,19 @@ const startQuiz = async (req, res) => {
         // Fetch questions from the API
         const questions = await fetchTriviaQuestions(10, category, difficulty);
 
+        req.session.category = category;
+
         res.render("quiz", {
             questions,
-            userID: req.session.userID || null
+            userID: req.session.userID || null,
+            username: req.session.username || null
         });
     } catch (error) {
         // handle errors, render the index page with an error message
         res.render("index", {
             error: error.message,
-            userID: req.session.userID || null
+            userID: req.session.userID || null,
+            username: req.session.username || null
         });
     }
 };
@@ -25,7 +29,7 @@ const submitQuiz = async (req, res) => {
     const userAnswers = [];
     const correctAnswers = [];
     const questions = [];
-    const totalQuestions = Object.keys(req.body).length / 3; // Half of the inputs are user answers, half are correct answers
+    const totalQuestions = Object.keys(req.body).length / 3; // 1/3 of the inputs are user answers, 1/3 are correct answers and 1/3 is the question text
 
     for (let i = 0; i < totalQuestions; i++) {
         userAnswers.push(req.body[`answer${i}`]); // Extract user answers
@@ -45,25 +49,66 @@ const submitQuiz = async (req, res) => {
         }
     });
 
+    // Store answered questions in the database
     try {
-        const userID = req.session.userID;
-        const category = req.session.quizCategory;
-
+        const category = req.session.category;
+        // const questions = req.session.questions;
         for (let i = 0; i < questions.length; i++) {
-            const { question, userAnswer, correctAnswer } = questions[i];
-            const isCorrect = userAnswer === correctAnswer ? 1 : 0;
+            const question = questions[i];
+            const userAnswer = userAnswers[i];
+            const isCorrect = userAnswer === correctAnswers[i];
 
-            const sqlQuery = `
-                INSERT INTO QuestionResults (UserID, Category, Question, UserAnswer, CorrectAnswer, IsCorrect, AnsweredAt)
-                VALUES (${userID}, '${category}', '${question.replace(/'/g, "''")}', '${userAnswer.replace(/'/g, "''")}', '${correctAnswer.replace(/'/g, "''")}', ${isCorrect}, GETDATE())
+            // check if the question has already been answered by the user
+            const checkQuestionQuery = `
+                SELECT AnswerID 
+                FROM QuestionResults 
+                WHERE UserID = ${req.session.userID} 
+                AND Question = '${question.question.replace(/'/g, "''")}' 
+                AND Category = '${category}'
             `;
-            await query(sqlQuery);
+            const result = await query(checkQuestionQuery);
+
+            // if not, store it
+            if (result.length === 0) {
+                const insertQuery = `
+                    INSERT INTO QuestionResults (
+                                                 UserID, 
+                                                 Category, 
+                                                 Question, 
+                                                 UserAnswer, 
+                                                 CorrectAnswer, 
+                                                 IsCorrect, 
+                                                 AnsweredAt)
+                    VALUES (
+                            ${req.session.userID}, 
+                            '${category}', 
+                            '${question.question.replace(/'/g, "''")}', 
+                            '${userAnswer.replace(/'/g, "''")}', 
+                            '${correctAnswers[i].replace(/'/g, "''")}', 
+                            ${isCorrect ? 1 : 0}, 
+                            GETDATE())
+                `;
+                await query(insertQuery);
+            }
         }
 
-        res.render("results", { score, totalQuestions, questions });
+        res.render("results", {
+            score,
+            totalQuestions,
+            questions,
+            userID: req.session.userID || null,
+            username: req.session.username || null
+        });
     } catch (err) {
         console.error("Error saving results to database:", err);
-        res.render("results", { score, totalQuestions, questions, error: "Failed to save results." });
+        res.render("results", {
+            score,
+            totalQuestions,
+            questions,
+            userID: req.session.userID || null,
+            username: req.session.username || null,
+            error: "Failed to save results."
+        });
     }
 };
 
