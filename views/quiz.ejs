@@ -8,7 +8,7 @@
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
-<%- include('partials/navbar', { userID: userID, username: username }) %>
+<%- include('partials/navbar', { userID: userID, username: username, profilePicture: profilePicture }) %>
 <header class="main-header">
     <div class="container">
         <h1>Your Trivia Quiz</h1>
@@ -16,21 +16,21 @@
     </div>
 </header>
 <main>
-    <div class="container">
-        <form action="/results" method="POST" class="quiz-form">
+    <div class="quiz-container">
+        <form action="/results" method="POST" class="quiz-form" id="quiz-form">
             <% questions.forEach((question, index) => { %>
                 <section class="question-group">
-                    <h3>Q<%= index + 1 %>: <%= question.question %></h3>
+                    <h3 class="question-text">Q<%= index + 1 %>: <%= question.question %></h3>
                     <ul class="options-list">
                         <%
                             const options = [...question.incorrect_answers, question.correct_answer];
                             options.sort(() => Math.random() - 0.5);
                         %>
                         <% options.forEach((option) => { %>
-                            <li>
+                            <li class="category-card answer-card">
                                 <label class="option-label">
-                                    <input type="radio" name="answer<%= index %>" value="<%= option %>" required />
-                                    <%= option %>
+                                    <input type="radio" name="answer<%= index %>" value="<%= option %>"/>
+                                    <span class="option-text"><%= option %></span>
                                 </label>
                             </li>
                         <% }); %>
@@ -39,11 +39,57 @@
                     <input type="hidden" name="correctAnswer<%= index %>" value="<%= question.correct_answer %>" />
                 </section>
             <% }); %>
-
-            <button type="submit">Submit Answers</button>
+            <button type="submit" class="start-quiz-button">Submit Quiz</button>
         </form>
     </div>
 </main>
 <%- include('partials/footer') %>
+<script>
+    document.querySelectorAll('.question-group').forEach(group => {
+        const answerCards = group.querySelectorAll('.answer-card');
+
+        answerCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove 'selected' from all cards in this group
+                answerCards.forEach(c => c.classList.remove('selected'));
+                // Add 'selected' to the clicked card
+                this.classList.add('selected');
+
+                // Check the radio
+                const selectedRadio = this.querySelector('input[type="radio"]');
+                if (selectedRadio) {
+                    selectedRadio.checked = true;
+                }
+
+                // Remove highlight if answered
+                group.classList.remove('highlight');
+                group.querySelector('.question-text').classList.remove('unanswered');
+            });
+        });
+    });
+
+    document.getElementById('quiz-form').addEventListener('submit', function (e) {
+        let unanswered = false;
+
+        document.querySelectorAll('.question-group').forEach((group) => {
+            const isAnswered = group.querySelector('input[type="radio"]:checked') !== null;
+            const questionHeader = group.querySelector('.question-text');
+
+            if (!isAnswered) {
+                unanswered = true;
+                group.classList.add('highlight');
+                questionHeader.classList.add('unanswered');
+            } else {
+                group.classList.remove('highlight');
+                questionHeader.classList.remove('unanswered');
+            }
+        });
+
+        if (unanswered) {
+            e.preventDefault();
+            alert('Please answer all the questions before submitting!');
+        }
+    });
+</script>
 </body>
 </html>

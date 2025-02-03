@@ -4,7 +4,7 @@
         <div class="user-profile">
             <div class="profile-toggle">
                 <span><%= username %></span>
-                <img src="images/profile.png" alt="Profile Picture">
+                <img src="<%= profilePicture || '/images/profile.png' %>" alt="Profile Picture"/>
                 <span class="dropdown-arrow">▼</span>
             </div>
             <div class="dropdown-menu">

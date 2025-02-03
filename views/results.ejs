@@ -8,7 +8,7 @@
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
 </head>
 <body>
-<%- include('partials/navbar', { userID: userID, username: username }) %>
+<%- include('partials/navbar', { userID: userID, username: username, profilePicture: profilePicture }) %>
 <header class="main-header">
     <div class="container">
         <h1>Your Quiz Results</h1>
@@ -16,21 +16,28 @@
 </header>
 <main>
     <div class="container results-container">
-        <p>You answered <span class="score"><%= score %></span> out of <span class="total"><%= totalQuestions %></span> questions correctly.</p>
+        <div class="score-summary">
+            <p>You answered <span class="score"><%= score %></span> out of <span class="total"><%= totalQuestions %></span> questions correctly.</p>
+        </div>
+
         <div class="feedback">
             <% questions.forEach((question, index) => { %>
                 <div class="question-feedback">
                     <h3>Q<%= index + 1 %>: <%= question.question %></h3>
-                    <p>Your Answer: <%= question.userAnswer %></p>
-                    <p>Correct Answer: <%= question.correctAnswer %></p>
+                    <p>Your Answer: <span class="user-answer <%= question.userAnswer === question.correctAnswer ? 'correct' : 'incorrect' %>">
+                        <%= question.userAnswer %>
+                    </span></p>
+                    <p>Correct Answer: <span class="correct-answer"><%= question.correctAnswer %></span></p>
                     <p class="<%= question.userAnswer === question.correctAnswer ? 'correct' : 'incorrect' %>">
-                        <%= question.userAnswer === question.correctAnswer ? 'Correct!' : 'Incorrect!' %>
+                        <%= question.userAnswer === question.correctAnswer ? '✅ Correct!' : '❌ Incorrect!' %>
                     </p>
                 </div>
             <% }); %>
         </div>
         <p>Good job! You can always try again to improve your score.</p>
-        <a href="/" style="text-decoration: none"><button type="submit">Try Again</button></a>
+        <div class="button-container">
+            <a href="/" style="text-decoration: none"><button type="submit">Try Again</button></a>
+        </div>
     </div>
 </main>
 <%- include('partials/footer') %>

@@ -5,9 +5,19 @@ const path = require("path");
 const quizController = require("./src/quizController");
 const apiService = require("./src/apiService");
 const { query } = require("./src/db");
+const multer = require("multer");
+const { BlobServiceClient } = require("@azure/storage-blob");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const containerName = "profile-pictures";
+const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
 const categoryMap = {
     9: "General Knowledge",
@@ -27,8 +37,7 @@ app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
-}));
+    saveUninitialized: true,}));
 
 // routes
 app.get("/", async (req, res) => {
@@ -39,6 +48,7 @@ app.get("/", async (req, res) => {
     res.render('index', {
         userID: req.session.userID || null,
         username: req.session.username || null,
+        profilePicture: req.session.profilePicture || null,
         error: null
     });
 });
@@ -55,7 +65,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { username, password, phone_number, email } = req.body;
+    const { username, password, phone_number, email, profilePicture } = req.body;
 
     // basic validation
     if (!username || !password || !phone_number || !email) {
@@ -92,11 +102,13 @@ app.post('/register', async (req, res) => {
                 userID: req.session.userID || null
             });
         }
+        // Set default profile picture path
+        const defaultProfilePicture = '/images/profile.png';
 
         // new user into the database
         const insertUserQuery = `
-            INSERT INTO Users (username, password, phone_number, email)
-            VALUES ('${username}', '${password}', '${phone_number}', '${email}')
+            INSERT INTO Users (username, password, phone_number, email, profile_picture_url)
+            VALUES ('${username}', '${password}', '${phone_number}', '${email}', '${defaultProfilePicture}')
         `;
         await query(insertUserQuery);
         res.redirect('/login');
@@ -112,11 +124,12 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const sqlQuery = `SELECT ID, username FROM Users WHERE username = '${username}' AND password = '${password}'`;
+        const sqlQuery = `SELECT ID, username, profile_picture_url FROM Users WHERE username = '${username}' AND password = '${password}'`;
         const result = await query(sqlQuery);
         if (result.length > 0) {
             req.session.userID = result[0].ID;
             req.session.username = result[0].username;
+            req.session.profilePicture = result[0].profile_picture_url || '/images/profile.png';
             res.redirect('/');
         } else {
             res.render('login', {
@@ -147,6 +160,9 @@ app.get('/profile', async (req, res) => {
     }
     try {
         const totalQuestions = await apiService.fetchTotalQuestions();
+        const profileQuery = `SELECT profile_picture_url FROM Users WHERE ID = ${req.session.userID}`;
+        const profileData = await query(profileQuery);
+        let profilePictureUrl = profileData[0]?.profile_picture_url;
 
         // unique questions answered by the user
         const userQuestionsQuery = `
@@ -161,10 +177,15 @@ app.get('/profile', async (req, res) => {
         const totalAnswered = userQuestions.length;
         const progressPercentage = ((totalAnswered / totalQuestions) * 100).toFixed(2);
 
+        if (!profilePictureUrl) {
+            profilePictureUrl = '/images/profile.png';
+        }
+
         res.render('profile', {
             userID: req.session.userID,
             username: req.session.username,
             progressPercentage: progressPercentage,
+            profilePicture: req.session.profilePicture,  // Pass the profile picture URL to the template
             error: null
         });
     } catch (err) {
@@ -172,6 +193,7 @@ app.get('/profile', async (req, res) => {
         res.render('profile', {
             userID: req.session.userID,
             username: req.session.username,
+            profilePictureUrl: '/images/profile.png',
             progressPercentage: 0,
             error: 'Failed to load profile data.'
         });
@@ -188,7 +210,7 @@ app.get("/userChartData", async (req, res) => {
 
         const categoryCounts = {};
         userQuestions.forEach((question) => {
-            const categoryName = categoryMap[question.Category] || `Category ${question.Category}`;
+            const categoryName = categoryMap[question.Category] || `Any Category ${question.Category}`;
             categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
         });
 
@@ -206,6 +228,36 @@ app.get("/userChartData", async (req, res) => {
     } catch (err) {
         console.error("Error loading chart data:", err);
         res.status(500).json({ error: "Failed to load chart data" });
+    }
+});
+
+app.post("/upload-profile-picture", upload.single("profilePicture"), async (req, res) => {
+    if (!req.session.userID) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const file = req.file;
+    if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    try {
+        const blobName = `${req.session.userID}-${uuidv4()}-${file.originalname}`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        await blockBlobClient.uploadData(file.buffer, {
+            blobHTTPHeaders: { blobContentType: file.mimetype }
+        });
+
+        const profilePictureUrl = blockBlobClient.url;
+
+        const updateQuery = `UPDATE Users SET profile_picture_url = '${profilePictureUrl}' WHERE ID = ${req.session.userID}`;
+        await query(updateQuery);
+
+        res.json({ success: true, profilePictureUrl });
+    } catch (err) {
+        console.error("Upload error:", err);
+        res.status(500).json({ error: "Upload failed" });
     }
 });
 

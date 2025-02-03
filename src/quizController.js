@@ -13,14 +13,16 @@ const startQuiz = async (req, res) => {
         res.render("quiz", {
             questions,
             userID: req.session.userID || null,
-            username: req.session.username || null
+            username: req.session.username || null,
+            profilePicture: req.session.profilePicture || null
         });
     } catch (error) {
         // handle errors, render the index page with an error message
         res.render("index", {
             error: error.message,
             userID: req.session.userID || null,
-            username: req.session.username || null
+            username: req.session.username || null,
+            profilePicture: req.session.profilePicture || null
         });
     }
 };
@@ -97,7 +99,8 @@ const submitQuiz = async (req, res) => {
             totalQuestions,
             questions,
             userID: req.session.userID || null,
-            username: req.session.username || null
+            username: req.session.username || null,
+            profilePicture: req.session.profilePicture || null
         });
     } catch (err) {
         console.error("Error saving results to database:", err);
@@ -107,6 +110,7 @@ const submitQuiz = async (req, res) => {
             questions,
             userID: req.session.userID || null,
             username: req.session.username || null,
+            profilePicture: req.session.profilePicture || null,
             error: "Failed to save results."
         });
     }
