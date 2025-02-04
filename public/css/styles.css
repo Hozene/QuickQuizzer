@@ -36,13 +36,13 @@ body {
     font-weight: bold;
     color: #6a11cb;
     display: flex;
-    align-items: center;  /* Vertically center the logo text */
-    text-decoration: none; /* Remove text decoration */
+    align-items: center;
+    text-decoration: none;
 }
 
 .navbar .logo img {
     max-height: 40px;
-    margin-right: 10px; /* Adjust spacing between the logo text and icon */
+    margin-right: 10px;
 }
 
 .navbar .user-profile {
@@ -110,7 +110,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
-    transition-delay: 0.1s; /* Delay the disappearance */
+    transition-delay: 0.1s;
 }
 
 .dropdown-menu:hover {
@@ -275,7 +275,7 @@ main p {
 }
 
 input[type="radio"] {
-    display: none; /* This will hide the radio button */
+    display: none;
 }
 
 .answer-card {
@@ -458,9 +458,32 @@ footer p {
     color: #555;
 }
 
+/* Profile Page Styles */
+.profile-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 /* Progress Bar */
 .progress-container {
     margin-bottom: 40px;
+}
+
+.progress-container h3 {
+    font-size: 24px;
+    color: #6a11cb;
+    margin-bottom: 15px;
+}
+
+.progress-container p {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px;
 }
 
 .progress-bar {
@@ -481,7 +504,13 @@ footer p {
 /* Chart Container */
 .chart-container {
     max-width: 400px;
-    margin: 0 auto;
+    margin: 0 auto 40px;
+}
+
+.chart-container h3 {
+    font-size: 24px;
+    color: #6a11cb;
+    margin-bottom: 20px;
 }
 
 /* Login and Register Container */

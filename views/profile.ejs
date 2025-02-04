@@ -12,9 +12,12 @@
 <body>
 <%- include('partials/navbar', { userID: userID, username: username, profilePicture: profilePicture }) %>
 <main>
-    <div class="container">
-        <h1>Profile</h1>
-        <p>Welcome, <%= username %>!</p>
+    <div class="profile-container">
+        <p>Welcome, <%= username %>! <br>Here are your statistics so far:</p>
+                <div class="chart-container">
+                    <h3>Questions Answered by Category</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
 
         <!-- progress bar -->
         <div class="progress-container">
@@ -23,12 +26,6 @@
                 <div class="progress" style="width: <%= progressPercentage %>%;"></div>
             </div>
             <p><%= progressPercentage %>% of all questions answered.</p>
-        </div>
-
-        <!-- pie chart -->
-        <div class="chart-container">
-            <h3>Questions Answered by Category</h3>
-            <canvas id="pieChart"></canvas>
         </div>
     </div>
 </main>
