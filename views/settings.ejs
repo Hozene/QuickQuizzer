@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickQuizzer - Settings</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="images/icon.ico" type="image/x-icon">
+</head>
+<body>
+<%- include('partials/navbar', { userID: userID, username: username, profilePicture: profilePicture }) %>
+<main>
+    <div class="settings-container">
+        <h1>Settings</h1>
+
+        <!-- Profile Picture Section -->
+        <div class="settings-section">
+            <h2>Profile Picture</h2>
+            <div class="profile-picture-upload">
+                <div class="profile-img-container">
+                    <img src="<%= profilePicture || '/images/profile.png' %>" alt="Profile Picture" class="profile-img">
+                    <div class="upload-overlay">
+                        <label for="profile-picture-upload" class="upload-label">Change</label>
+                        <input type="file" id="profile-picture-upload" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Email Section -->
+        <div class="settings-section">
+            <h2>Change Email</h2>
+            <form id="change-email-form">
+                <div class="form-group">
+                    <label for="new-email">New Email</label>
+                    <input type="email" id="new-email" name="new-email" value="<%= email %>" required>
+                </div>
+                <button type="submit" class="submit-button">Update Email</button>
+            </form>
+        </div>
+
+        <!-- Change Phone Number Section -->
+        <div class="settings-section">
+            <h2>Change Phone Number</h2>
+            <form id="change-phone-form">
+                <div class="form-group">
+                    <label for="new-phone">New Phone Number</label>
+                    <input type="tel" id="new-phone" name="new-phone" value="<%= phone_number %>" required>
+                </div>
+                <button type="submit" class="submit-button">Update Phone Number</button>
+            </form>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="settings-section">
+            <h2>Change Password</h2>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" name="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit" class="submit-button">Update Password</button>
+            </form>
+        </div>
+    </div>
+</main>
+<%- include('partials/footer') %>
+
+<script>
+    document.getElementById('profile-picture-upload').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+
+        try {
+            const response = await fetch('/update-profile-picture', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (data.profilePictureUrl) {
+                document.querySelector('.profile-img').src = data.profilePictureUrl;
+                location.reload();
+            }
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+        }
+    });
+
+    document.getElementById('change-email-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const newEmail = document.getElementById('new-email').value;
+
+        try {
+            const response = await fetch('/update-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newEmail }),
+            });
+
+            const data = await response.json();
+            alert(data.message || data.error);
+        } catch (error) {
+            console.error('Error updating email:', error);
+        }
+    });
+
+    document.getElementById('change-phone-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const newPhone = document.getElementById('new-phone').value;
+
+        try {
+            const response = await fetch('/update-phone', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPhone }),
+            });
+
+            const data = await response.json();
+            alert(data.message || data.error);
+        } catch (error) {
+            console.error('Error updating phone number:', error);
+        }
+    });
+
+    document.getElementById('change-password-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        try {
+            const response = await fetch('/update-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+            });
+
+            const data = await response.json();
+            alert(data.message || data.error);
+        } catch (error) {
+            console.error('Error updating password:', error);
+        }
+    });
+</script>
+</body>
+</html>

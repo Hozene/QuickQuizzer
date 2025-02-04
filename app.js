@@ -185,7 +185,7 @@ app.get('/profile', async (req, res) => {
             userID: req.session.userID,
             username: req.session.username,
             progressPercentage: progressPercentage,
-            profilePicture: req.session.profilePicture,  // Pass the profile picture URL to the template
+            profilePicture: profilePictureUrl,  // Pass the profile picture URL to the template
             error: null
         });
     } catch (err) {
@@ -231,7 +231,35 @@ app.get("/userChartData", async (req, res) => {
     }
 });
 
-app.post("/upload-profile-picture", upload.single("profilePicture"), async (req, res) => {
+app.get('/settings', async (req, res) => {
+    if (!req.session.userID) {
+        return res.redirect('/login');
+    }
+    try {
+        const userQuery = `SELECT email, phone_number FROM Users WHERE ID = ${req.session.userID}`;
+        const userData = await query(userQuery);
+        const { email, phone_number } = userData[0];
+
+        res.render('settings', {
+            userID: req.session.userID,
+            username: req.session.username,
+            profilePicture: req.session.profilePicture,
+            email,
+            phone_number,
+            error: null
+        });
+    } catch (err) {
+        console.error('Error loading settings:', err);
+        res.render('settings', {
+            userID: req.session.userID,
+            username: req.session.username,
+            profilePicture: req.session.profilePicture,
+            error: 'Failed to load settings.'
+        });
+    }
+});
+
+app.post('/update-profile-picture', upload.single("profilePicture"), async (req, res) => {
     if (!req.session.userID) {
         return res.status(401).json({ error: "Unauthorized" });
     }
@@ -254,10 +282,97 @@ app.post("/upload-profile-picture", upload.single("profilePicture"), async (req,
         const updateQuery = `UPDATE Users SET profile_picture_url = '${profilePictureUrl}' WHERE ID = ${req.session.userID}`;
         await query(updateQuery);
 
+        req.session.profilePicture = profilePictureUrl;
+
         res.json({ success: true, profilePictureUrl });
     } catch (err) {
         console.error("Upload error:", err);
         res.status(500).json({ error: "Upload failed" });
+    }
+});
+
+app.post('/update-email', async (req, res) => {
+    if (!req.session.userID) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { newEmail } = req.body;
+    if (!newEmail) {
+        return res.status(400).json({ error: "New email is required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+        return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    try {
+        const updateQuery = `UPDATE Users SET email = '${newEmail}' WHERE ID = ${req.session.userID}`;
+        await query(updateQuery);
+
+        res.json({ success: true, message: "Email updated successfully" });
+    } catch (err) {
+        console.error("Error updating email:", err);
+        res.status(500).json({ error: "Failed to update email" });
+    }
+});
+
+app.post('/update-phone', async (req, res) => {
+    if (!req.session.userID) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { newPhone } = req.body;
+    if (!newPhone) {
+        return res.status(400).json({ error: "New phone number is required" });
+    }
+
+    const phoneRegex = /^\+?[0-9\s()]{10,15}$/;
+    if (!phoneRegex.test(newPhone)) {
+        return res.status(400).json({ error: "Invalid phone number format" });
+    }
+
+    try {
+        const updateQuery = `UPDATE Users SET phone_number = '${newPhone}' WHERE ID = ${req.session.userID}`;
+        await query(updateQuery);
+
+        res.json({ success: true, message: "Phone number updated successfully" });
+    } catch (err) {
+        console.error("Error updating phone number:", err);
+        res.status(500).json({ error: "Failed to update phone number" });
+    }
+});
+
+app.post('/update-password', async (req, res) => {
+    if (!req.session.userID) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "New password and confirmation do not match" });
+    }
+
+    try {
+        const userQuery = `SELECT password FROM Users WHERE ID = ${req.session.userID}`;
+        const userData = await query(userQuery);
+        const storedPassword = userData[0].password;
+
+        if (currentPassword !== storedPassword) {
+            return res.status(400).json({ error: "Current password is incorrect" });
+        }
+
+        const updateQuery = `UPDATE Users SET password = '${newPassword}' WHERE ID = ${req.session.userID}`;
+        await query(updateQuery);
+
+        res.json({ success: true, message: "Password updated successfully" });
+    } catch (err) {
+        console.error("Error updating password:", err);
+        res.status(500).json({ error: "Failed to update password" });
     }
 });
 
