@@ -6,6 +6,17 @@
     <title>QuickQuizzer - Settings</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .error-border {
+            border: 2px solid red !important;
+        }
+    </style>
 </head>
 <body>
 <%- include('partials/navbar', { userID: userID, username: username, profilePicture: profilePicture }) %>
@@ -33,10 +44,12 @@
             <form id="change-email-form">
                 <div class="form-group">
                     <label for="new-email">New Email</label>
-                    <input type="email" id="new-email" name="new-email" value="<%= email %>" required>
+                    <input type="email" id="new-email" name="new-email" required>
+                    <div id="email-error" class="error-message">Invalid email format. Example: user@example.com</div>
                 </div>
                 <button type="submit" class="submit-button">Update Email</button>
             </form>
+            <p id="email-success" class="success-message" style="color: green; display: none;">Email updated successfully!</p>
         </div>
 
         <!-- Change Phone Number Section -->
@@ -45,10 +58,12 @@
             <form id="change-phone-form">
                 <div class="form-group">
                     <label for="new-phone">New Phone Number</label>
-                    <input type="tel" id="new-phone" name="new-phone" value="<%= phone_number %>" required>
+                    <input type="tel" id="new-phone" name="new-phone" required>
+                    <div id="phone-error" class="error-message">Invalid phone number format. Example: +1234567890</div>
                 </div>
                 <button type="submit" class="submit-button">Update Phone Number</button>
             </form>
+            <p id="phone-success" class="success-message" style="color: green; display: none;">Phone number updated successfully!</p>
         </div>
 
         <!-- Change Password Section -->
@@ -58,17 +73,21 @@
                 <div class="form-group">
                     <label for="current-password">Current Password</label>
                     <input type="password" id="current-password" name="current-password" required>
+                    <div id="current-password-error" class="error-message">Current password is incorrect.</div>
                 </div>
                 <div class="form-group">
                     <label for="new-password">New Password</label>
                     <input type="password" id="new-password" name="new-password" required>
+                    <div id="new-password-error" class="error-message">New password must be at least 8 characters long.</div>
                 </div>
                 <div class="form-group">
                     <label for="confirm-password">Confirm New Password</label>
                     <input type="password" id="confirm-password" name="confirm-password" required>
+                    <div id="confirm-password-error" class="error-message">Passwords do not match.</div>
                 </div>
                 <button type="submit" class="submit-button">Update Password</button>
             </form>
+            <p id="password-success" class="success-message" style="color: green; display: none;">Password changed successfully!</p>
         </div>
     </div>
 </main>
@@ -101,6 +120,17 @@
     document.getElementById('change-email-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const newEmail = document.getElementById('new-email').value;
+        const emailError = document.getElementById('email-error');
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newEmail)) {
+            emailError.style.display = 'block';
+            document.getElementById('new-email').classList.add('error-border');
+            return;
+        } else {
+            emailError.style.display = 'none';
+            document.getElementById('new-email').classList.remove('error-border');
+        }
 
         try {
             const response = await fetch('/update-email', {
@@ -110,7 +140,15 @@
             });
 
             const data = await response.json();
-            alert(data.message || data.error);
+            if (data.success) {
+                document.getElementById('new-email').value = '';
+                document.getElementById('email-success').style.display = 'block';
+                setTimeout(() => document.getElementById('email-success').style.display = 'none', 3000);
+            } else {
+                emailError.textContent = data.error || "Failed to update email.";
+                emailError.style.display = 'block';
+                document.getElementById('new-email').classList.add('error-border');
+            }
         } catch (error) {
             console.error('Error updating email:', error);
         }
@@ -119,6 +157,17 @@
     document.getElementById('change-phone-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const newPhone = document.getElementById('new-phone').value;
+        const phoneError = document.getElementById('phone-error');
+
+        const phoneRegex = /^\+?[0-9\s()]{10,15}$/;
+        if (!phoneRegex.test(newPhone)) {
+            phoneError.style.display = 'block';
+            document.getElementById('new-phone').classList.add('error-border');
+            return;
+        } else {
+            phoneError.style.display = 'none';
+            document.getElementById('new-phone').classList.remove('error-border');
+        }
 
         try {
             const response = await fetch('/update-phone', {
@@ -128,7 +177,15 @@
             });
 
             const data = await response.json();
-            alert(data.message || data.error);
+            if (data.success) {
+                document.getElementById('new-phone').value = '';
+                document.getElementById('phone-success').style.display = 'block';
+                setTimeout(() => document.getElementById('phone-success').style.display = 'none', 3000);
+            } else {
+                phoneError.textContent = data.error || "Failed to update phone number.";
+                phoneError.style.display = 'block';
+                document.getElementById('new-phone').classList.add('error-border');
+            }
         } catch (error) {
             console.error('Error updating phone number:', error);
         }
@@ -140,6 +197,24 @@
         const newPassword = document.getElementById('new-password').value;
         const confirmPassword = document.getElementById('confirm-password').value;
 
+        const currentPasswordError = document.getElementById('current-password-error');
+        const newPasswordError = document.getElementById('new-password-error');
+        const confirmPasswordError = document.getElementById('confirm-password-error');
+
+        currentPasswordError.style.display = 'none';
+        newPasswordError.style.display = 'none';
+        confirmPasswordError.style.display = 'none';
+        document.getElementById('current-password').classList.remove('error-border');
+        document.getElementById('new-password').classList.remove('error-border');
+        document.getElementById('confirm-password').classList.remove('error-border');
+
+        if (newPassword !== confirmPassword) {
+            confirmPasswordError.textContent = "Passwords do not match.";
+            confirmPasswordError.style.display = 'block';
+            document.getElementById('confirm-password').classList.add('error-border');
+            return;
+        }
+
         try {
             const response = await fetch('/update-password', {
                 method: 'POST',
@@ -148,7 +223,21 @@
             });
 
             const data = await response.json();
-            alert(data.message || data.error);
+            if (data.success) {
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+
+                document.getElementById('password-success').style.display = 'block';
+                setTimeout(() => document.getElementById('password-success').style.display = 'none', 3000);
+            } else {
+                if (data.error === "Current password is incorrect") {
+                    currentPasswordError.style.display = 'block';
+                    document.getElementById('current-password').classList.add('error-border');
+                } else {
+                    alert(data.error || "Failed to update password.");
+                }
+            }
         } catch (error) {
             console.error('Error updating password:', error);
         }
