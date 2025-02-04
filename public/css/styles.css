@@ -13,7 +13,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 /* Header */
@@ -35,6 +35,14 @@ body {
     font-size: 24px;
     font-weight: bold;
     color: #6a11cb;
+    display: flex;
+    align-items: center;  /* Vertically center the logo text */
+    text-decoration: none; /* Remove text decoration */
+}
+
+.navbar .logo img {
+    max-height: 40px;
+    margin-right: 10px; /* Adjust spacing between the logo text and icon */
 }
 
 .navbar .user-profile {
@@ -474,4 +482,100 @@ footer p {
 .chart-container {
     max-width: 400px;
     margin: 0 auto;
+}
+
+/* Login and Register Container */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.left-side {
+    width: 50%;
+    padding: 20px;
+    text-align: center;
+}
+
+.right-side {
+    width: 50%;
+    padding: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.left-side img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+.login-container h2 {
+    font-size: 36px;
+    color: #6a11cb;
+    margin-bottom: 20px;
+}
+
+.login-container form {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.login-container.form-group {
+    margin-bottom: 20px;
+}
+
+.login-container label {
+    font-weight: bold;
+    color: #6a11cb;
+}
+
+.login-container input.form-control {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.login-container button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #6a11cb;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-container button:hover {
+    background-color: #2575fc;
+}
+
+.login-container p {
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+.login-container a {
+    color: #2575fc;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 20px;
 }
